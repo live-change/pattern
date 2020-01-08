@@ -1,0 +1,14 @@
+{
+  "name": "reactive-pattern",
+  "version": "0.1.0",
+  "description": "Realtime usage pattern analysis for security, analytics and gamification purposes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \\\"Error: no tests specified\\\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "blue-tape": "^1.0.0"
+  }
+}
