@@ -76,9 +76,11 @@ test("compile fail2ban chain with expire", (t) => {
     const processor = new rp.LiveProcessor(model)
     const ip = (Math.random()*1000).toFixed()
 
+    let time = 0
+
     t.test('push first event', async (t) => {
       t.plan(1)
-      const actions = await processor.processEvent({ type: 'failed-login', keys: { ip } }, 0)
+      const actions = await processor.processEvent({ type: 'failed-login', keys: { ip }, time }, 0)
       console.log("EVT", processor.eventRelations)
       console.log("TO", processor.timeouts)
       console.log("ACTIONS", actions)
@@ -88,7 +90,8 @@ test("compile fail2ban chain with expire", (t) => {
 
     t.test('wait 2.5m for expire', async (t) => {
       t.plan(1)
-      const actions = await processor.processTime(2.5 * 60 * 1000)
+      time += 2.5 * 60 * 1000
+      const actions = await processor.processTime(time)
       console.log("EVT", processor.eventRelations)
       console.log("TO", processor.timeouts)
       console.log("ACTIONS", actions)
@@ -98,7 +101,8 @@ test("compile fail2ban chain with expire", (t) => {
 
     t.test('push second event', async (t) => {
       t.plan(1)
-      const actions = await processor.processEvent({ type: 'failed-login', keys: { ip } }, 0)
+      time += 1000
+      const actions = await processor.processEvent({ type: 'failed-login', keys: { ip }, time }, 0)
       console.log("EVT", processor.eventRelations)
       console.log("TO", processor.timeouts)
       console.log("ACTIONS", actions)
@@ -108,7 +112,8 @@ test("compile fail2ban chain with expire", (t) => {
 
     t.test('push third event', async (t) => {
       t.plan(1)
-      const actions = await processor.processEvent({ type: 'failed-login', keys: { ip } }, 0)
+      time += 1000
+      const actions = await processor.processEvent({ type: 'failed-login', keys: { ip }, time }, 0)
       console.log("ACTIONS", actions)
       t.deepEqual(actions, ['ban'],'actions match')
     })
