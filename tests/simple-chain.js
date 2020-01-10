@@ -1,4 +1,4 @@
-const test = require('blue-tape')
+const test = require('tape')
 const rp = require('../index.js')
 
 let model
@@ -133,6 +133,7 @@ test("simple chain", (t) => {
     }
 
     t.test("related previous events", async (t) => {
+      t.plan(1)
       const related = await rp.findRelatedEvents([events[2]], true, model,
           -Infinity, Infinity, getEventsByRelation)
       console.log("RELATED", Array.from(related.values()))
@@ -142,6 +143,7 @@ test("simple chain", (t) => {
     })
 
     t.test("all related previous events", async (t) => {
+      t.plan(1)
       const related = await rp.findAllRelatedEvents([events[2]], true, model,
           -Infinity, Infinity, getEventsByRelation)
       console.log("RELATED", Array.from(related.values()))
@@ -152,6 +154,7 @@ test("simple chain", (t) => {
     })
 
     t.test("related next events", async (t) => {
+      t.plan(1)
       const related = await rp.findRelatedEvents([events[0]], false, model,
           -Infinity, Infinity, getEventsByRelation)
       console.log("RELATED", Array.from(related.values()))
@@ -161,6 +164,7 @@ test("simple chain", (t) => {
     })
 
     t.test("all related previous events", async (t) => {
+      t.plan(1)
       const related = await rp.findAllRelatedEvents([events[0]], false, model,
           -Infinity, Infinity, getEventsByRelation)
       console.log("RELATED", Array.from(related.values()))

@@ -1,4 +1,4 @@
-const test = require('blue-tape')
+const test = require('tape')
 const rp = require('../index.js')
 
 let model
