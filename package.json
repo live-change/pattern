@@ -21,6 +21,10 @@
   },
   "homepage": "https://github.com/live-change/pattern",
   "devDependencies": {
+    "d3": "^5.15.0",
+    "d3-node": "^2.2.1",
+    "d3-path-arrows": "^0.4.0",
+    "d3-sankey-circular": "^0.34.0",
     "tape": "^4.13.0"
   }
 }

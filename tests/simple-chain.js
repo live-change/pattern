@@ -1,5 +1,6 @@
 const test = require('tape')
 const rp = require('../index.js')
+const svg = require('./svg.js')
 
 let model
 
@@ -194,8 +195,9 @@ test("simple chain", (t) => {
       t.plan(1)
       const processor = new rp.FullGraphProcessor(model)
       for(const ev of events) await processor.processEvent(ev)
-      console.log("GRAPH\n  "+Array.from(processor.graph.values()).map(n => JSON.stringify(n)).join('\n  '))
-      t.deepEqual(Array.from(processor.graph.values()), [
+      const graph = processor.graph
+      console.log("GRAPH\n  "+Array.from(graph.values()).map(n => JSON.stringify(n)).join('\n  '))
+      t.deepEqual(Array.from(graph.values()), [
         {"id":0,"type":"enter-website","keys":{"sessionId":""+sessionId},"time":0,"prev":[],"next":[
             {"relation":"enter-website/sessionId/start-register","to":2},
             {"relation":"enter-website/sessionId/start-register","to":3}],
@@ -219,14 +221,21 @@ test("simple chain", (t) => {
             {"relation":"enter-website/sessionId/start-register/userId/finish-register","to":2}],
           "next":[],"start":false}
       ], 'proper graph generated')
+
+
+      await svg.generateGraphSvg("simple-chain-full-graph.svg", graph,
+          n => ({ ...n, label: n.type, title: `${n.id} at ${n.time}`, sort: n.time }),
+          (rel, source, target) => ({ ...rel, value: 1, label: rel.relation, title: rel.relation })
+      )
     })
 
     t.test("build summary graph with count", async (t) => {
       t.plan(1)
       const processor = new rp.SummaryGraphProcessor(model)
       for(const ev of events) await processor.processEvent(ev)
-      console.log("GRAPH\n  "+Array.from(processor.graph.values()).map(n => JSON.stringify(n)).join('\n  '))
-      t.deepEqual(Array.from(processor.graph.values()), [
+      const graph = processor.graph
+      console.log("GRAPH\n  "+Array.from(graph.values()).map(n => JSON.stringify(n)).join('\n  '))
+      t.deepEqual(Array.from(graph.values()), [
         {"id":"enter-website:0","prev":[],
           "next":[{"to":"enter-website/sessionId/start-register:1","counter":4}],
           "start":true,"counter":2},
@@ -238,6 +247,13 @@ test("simple chain", (t) => {
           "prev":[{"to":"enter-website/sessionId/start-register:1","counter":1}],
           "next":[],"start":false,"counter":1}
       ], 'proper graph generated')
+
+      rp.computeGraphDepth(graph,['enter-website:0'])
+
+      await svg.generateGraphSvg("simple-chain-summary-count.svg", graph,
+          n => ({ ...n, label: n.id.split(':')[0], title: `${n.id} at ${n.time}`, sort: n.depth }),
+          (rel, source, target) => ({ ...rel, value: rel.counter, label: rel.relation, title: rel.relation })
+      )
     })
 
     t.test("build summary graph with events", async (t) => {
@@ -248,8 +264,9 @@ test("simple chain", (t) => {
         ...rp.graphAggregation.summaryEvents
       })
       for (const ev of events) await processor.processEvent(ev)
-      console.log("GRAPH\n  " + Array.from(processor.graph.values()).map(n => JSON.stringify(n)).join('\n  '))
-      t.deepEqual(Array.from(processor.graph.values()), [
+      const graph = processor.graph
+      console.log("GRAPH\n  " + Array.from(graph.values()).map(n => JSON.stringify(n)).join('\n  '))
+      t.deepEqual(Array.from(graph.values()), [
         {"id":"enter-website:0","prev":[],
           "next":[{"to":"enter-website/sessionId/start-register:1","events":[2,3]}],
           "start":true,"events":[0,1]},
@@ -263,6 +280,13 @@ test("simple chain", (t) => {
           "start":false,"events":[4]}
 
       ], 'proper graph generated')
+
+      rp.computeGraphDepth(graph,['enter-website:0'])
+
+      await svg.generateGraphSvg("simple-chain-summary-events-count.svg", graph,
+          n => ({ ...n, label: n.id.split(':')[0], title: `${n.id} at ${n.time}`, sort: n.depth }),
+          (rel, source, target) => ({ ...rel, value: rel.events.length, label: rel.relation, title: rel.relation })
+      )
     })
   })
 
