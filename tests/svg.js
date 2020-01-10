@@ -16,7 +16,7 @@ function generateGraphSvg(filePath, graph,
       //.nodePaddingRatio(0.5)
       .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
       .nodeId(d => d.id)
-      .nodeAlign(d3.sankeyJustify)
+      .nodeAlign(d3.sankeyLeft)
       .iterations(5)
       .circularLinkGap(1)
       .sortNodes("sort")

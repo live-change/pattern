@@ -284,7 +284,7 @@ test("simple chain", (t) => {
       rp.computeGraphDepth(graph,['enter-website:0'])
 
       await svg.generateGraphSvg("simple-chain-summary-events-count.svg", graph,
-          n => ({ ...n, label: n.id.split(':')[0], title: `${n.id} at ${n.time}`, sort: n.depth }),
+          n => ({ ...n, label: n.id.split(':')[0], title: `${n.id}`, sort: n.depth }),
           (rel, source, target) => ({ ...rel, value: rel.events.length, label: rel.relation, title: rel.relation })
       )
     })
