@@ -21,7 +21,9 @@ function generateGraphSvg(filePath, graph,
       .circularLinkGap(1)
       .sortNodes("sort")
 
-  const sankeyData = sankey(rp.graphToD3Sankey(graph, nodeFunc, linkFunc))
+  const data = rp.graphToD3Sankey(graph, nodeFunc, linkFunc)
+  //console.log("SDATA", data)
+  const sankeyData = sankey(data)
   /* const sankeyData = sankey(rp.graphToD3Sankey(
        graph,
        nodeFunc = n => ({ ...n, col:depth, name: n.id, label: n.type,   }),

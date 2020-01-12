@@ -172,6 +172,30 @@ test("simple chain", (t) => {
     })
   }
 
+  let stats = {
+    "link-1": {
+      visitor: 0,
+      "started-registration": 0,
+      "registered": 0,
+      "shared": 0,
+      visitorFromShared: 0
+    },
+    "link-2": {
+      visitor: 0,
+      "started-registration": 0,
+      "registered": 0,
+      "shared": 0,
+      visitorFromShared: 0
+    },
+    "link-3": {
+      visitor: 0,
+      "started-registration": 0,
+      "registered": 0,
+      "shared": 0,
+      visitorFromShared: 0
+    }
+  }
+
   t.test('generate random events', async t => {
     t.plan(1)
 
@@ -199,6 +223,8 @@ test("simple chain", (t) => {
 
     function simulateEntry(keys, time, prob) {
       events.push({ id: id++, type: 'enter-website', keys, time })
+      if(Number.isInteger(keys.refId)) prob.stats.visitorFromShared++
+      else prob.stats.visitor++
       if(random() < prob.startRegister) {
         queued.push(() =>
             simulateStartRegister({ sessionId: keys.sessionId, userId: ++uid }, time + randTime(), prob)
@@ -212,6 +238,7 @@ test("simple chain", (t) => {
 
     function simulateStartRegister(keys, time, prob) {
       events.push({ id: id++, type: 'start-register', keys, time })
+      prob.stats['started-registration']++
       if(random() < prob.finishRegister) {
         queued.push(() =>
             simulateFinishRegister({ userId: keys.userId }, time + randTime(), prob)
@@ -225,6 +252,7 @@ test("simple chain", (t) => {
 
     function simulateFinishRegister(keys, time, prob) {
       events.push({ id: id++, type: 'finish-register', keys, time })
+      prob.stats['registered']++
       if(random() < prob.share) {
         queued.push(() =>
             simulateShare(keys, time + randTime(), prob)
@@ -234,10 +262,11 @@ test("simple chain", (t) => {
 
     function simulateShare(keys, time, prob) {
       events.push({ id: id++, type: 'share', keys, time })
+      prob.stats['shared']++
       for(let i = 0; i < prob.shareViews; i++) {
         if (random() < prob.shareEntry) {
           queued.push(() =>
-              simulateEntry({ refId: keys.userId }, time, prob)
+              simulateEntry({ refId: keys.userId, sessionId: ++uid }, time + randTime(), prob)
           )
         }
       }
@@ -250,7 +279,8 @@ test("simple chain", (t) => {
       finishRegister: 0.9,
       share: 0.4,
       shareViews: 50,
-      shareEntry: 0.3
+      shareEntry: 0.3,
+      stats: stats["link-1"]
     }
 
     const link2P = {
@@ -260,7 +290,8 @@ test("simple chain", (t) => {
       finishRegister: 0.9,
       share: 0.2,
       shareViews: 30,
-      shareEntry: 0.3
+      shareEntry: 0.3,
+      stats: stats["link-2"]
     }
 
     const link3P = {
@@ -270,7 +301,8 @@ test("simple chain", (t) => {
       finishRegister: 0.9,
       share: 0.5,
       shareViews: 20,
-      shareEntry: 0.3
+      shareEntry: 0.3,
+      stats: stats["link-3"]
     }
 
     for(let i = 0; i < 15; i++) {
@@ -289,7 +321,7 @@ test("simple chain", (t) => {
       next = queued
       queued = []
       for(const fun of next) fun()
-      if(events.length > 30000) break // throw new Error("Too much!")
+      if(events.length > 200) break; //throw new Error("Too much!")
       steps += next.length && 1
     } while(next.length > 0)
 
@@ -315,9 +347,21 @@ test("simple chain", (t) => {
         ...rp.graphAggregation.summaryEvents,
         nodes: ({ element, relation }, keys) => element == 'generated-link' ? [ keys.refId ] : [ element ],
       })
-      for (const ev of events) await processor.processEvent(ev)
+      for (const ev of events) {
+        await processor.processEvent(ev)
+      }
       const graph = processor.graph
       console.log("GRAPH\n  " + Array.from(graph.values()).map(n => JSON.stringify(n)).join('\n  '))
+
+      console.log("ALL VISITORS FROM SHARE", stats['link-1'].visitorFromShared
+          + stats['link-2'].visitorFromShared + stats['link-3'].visitorFromShared)
+      console.log("ALL VISITORS FROM LINK", stats['link-1'].visitor + stats['link-2'].visitor + stats['link-3'].visitor)
+      console.log("ALL STARTED REGISTRATION", stats['link-1']['started-registration']
+          + stats['link-2']['started-registration'] + stats['link-3']['started-registration'])
+      console.log("ALL REGISTERED", stats['link-1']['registered']
+          + stats['link-2']['registered'] + stats['link-3']['registered'])
+      console.log("ALL SHARED", stats['link-1']['shared']
+          + stats['link-2']['shared'] + stats['link-3']['shared'])
 
       t.pass('ok')
 
@@ -325,6 +369,7 @@ test("simple chain", (t) => {
 
       await svg.generateGraphSvg("viral-loop-summary-events-count.svg", graph, nodeViz, linkViz)
     })
+    t.pass('ok')
     t.test("depth summary graph with events", async (t) => {
       t.plan(1)
       const processor = new rp.SummaryGraphProcessor(model, {
@@ -356,7 +401,7 @@ test("simple chain", (t) => {
       const related = await rp.findAllRelatedEvents(start, false, model,
           -Infinity, Infinity, getEventsByRelation)
       const filtered = start.concat(Array.from(related.values()))
-      console.log("FILTERED", filtered)
+      //console.log("FILTERED", filtered)
       filtered.sort((a, b) => a.time == b.time ? 0 : (a.time > b.time ? 1 : -1))
 
       t.test("summary graph of "+link+" with events", async (t) => {
