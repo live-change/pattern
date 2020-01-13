@@ -92,21 +92,21 @@ test("simple chain", (t) => {
     t.plan(2)
 
     rp.prepareModelForLive(model)
-    const processor = new rp.LiveProcessor(model)
+    const processor = new rp.LiveProcessor(model, rp.relationsStore())
     const sessionId = (Math.random()*1000).toFixed()
     const userId = (Math.random()*1000).toFixed()
 
     t.test('push first event', async (t) => {
       t.plan(1)
       await processor.processEvent({ type: 'enter-website', keys: { sessionId }, time: 0 })
-      if(processor.eventRelations.get(`["start-register",[["sessionId","${sessionId}"]]]`)) t.pass('processed')
+      if(processor.store.eventRelations.get(`["start-register",[["sessionId","${sessionId}"]]]`)) t.pass('processed')
       else t.fail('no reaction')
     })
 
     t.test('push second event', async (t) => {
       t.plan(1)
       await processor.processEvent({ type: 'start-register', keys: { sessionId, userId }, time: 100 })
-      if(processor.eventRelations.get(`["finish-register",[["userId","${userId}"]]]`)) t.pass('processed')
+      if(processor.store.eventRelations.get(`["finish-register",[["userId","${userId}"]]]`)) t.pass('processed')
       else t.fail('no reaction')
     })
 
@@ -193,7 +193,7 @@ test("simple chain", (t) => {
 
     t.test("build full graph", async (t) => {
       t.plan(1)
-      const processor = new rp.FullGraphProcessor(model)
+      const processor = new rp.FullGraphProcessor(model, rp.relationsStore())
       for(const ev of events) await processor.processEvent(ev)
       const graph = processor.graph
       console.log("GRAPH\n  "+Array.from(graph.values()).map(n => JSON.stringify(n)).join('\n  '))
@@ -231,7 +231,7 @@ test("simple chain", (t) => {
 
     t.test("build summary graph with count", async (t) => {
       t.plan(1)
-      const processor = new rp.SummaryGraphProcessor(model)
+      const processor = new rp.SummaryGraphProcessor(model, rp.relationsStore())
       for(const ev of events) await processor.processEvent(ev)
       const graph = processor.graph
       console.log("GRAPH\n  "+Array.from(graph.values()).map(n => JSON.stringify(n)).join('\n  '))
@@ -258,7 +258,7 @@ test("simple chain", (t) => {
 
     t.test("build summary graph with events", async (t) => {
       t.plan(1)
-      const processor = new rp.SummaryGraphProcessor(model, {
+      const processor = new rp.SummaryGraphProcessor(model, rp.relationsStore(), {
         ...rp.graphAggregation.nodeElementDepth,
         ...rp.graphAggregation.relationSimple,
         ...rp.graphAggregation.summaryEvents

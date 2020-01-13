@@ -76,17 +76,17 @@ test("compile fail2ban chain with expire", (t) => {
     t.plan(4)
 
     rp.prepareModelForLive(model)
-    const processor = new rp.LiveProcessor(model)
+    const processor = new rp.LiveProcessor(model, rp.relationsStore())
     const ip = (Math.random()*1000).toFixed()
     let time = 0
 
     t.test('push first event', async (t) => {
       t.plan(1)
       const actions = await processor.processEvent({ type: 'failed-login', keys: { ip }, time }, 0)
-      console.log("EVT", processor.eventRelations)
+      console.log("EVT", processor.store.eventRelations)
       console.log("TO", processor.timeouts)
       console.log("ACTIONS", actions)
-      if(processor.eventRelations.get(`["failed-login",[["ip","${ip}"]]]`)) t.pass('processed')
+      if(processor.store.eventRelations.get(`["failed-login",[["ip","${ip}"]]]`)) t.pass('processed')
       else t.fail('no reaction')
     })
 
@@ -94,10 +94,10 @@ test("compile fail2ban chain with expire", (t) => {
       t.plan(1)
       time += 2.5 * 60 * 1000
       const actions = await processor.processTime(time)
-      console.log("EVT", processor.eventRelations)
+      console.log("EVT", processor.store.eventRelations)
       console.log("TO", processor.timeouts)
       console.log("ACTIONS", actions)
-      if(!processor.eventRelations.get(`["failed-login",[["ip","${ip}"]]]`)) t.pass('expired')
+      if(!processor.store.eventRelations.get(`["failed-login",[["ip","${ip}"]]]`)) t.pass('expired')
       else t.fail('still exists')
     })
 
@@ -105,10 +105,10 @@ test("compile fail2ban chain with expire", (t) => {
       t.plan(1)
       time += 1000
       const actions = await processor.processEvent({ type: 'failed-login', keys: { ip }, time }, 0)
-      console.log("EVT", processor.eventRelations)
+      console.log("EVT", processor.store.eventRelations)
       console.log("TO", processor.timeouts)
       console.log("ACTIONS", actions)
-      if(processor.eventRelations.get(`["failed-login",[["ip","${ip}"]]]`)) t.pass('processed')
+      if(processor.store.eventRelations.get(`["failed-login",[["ip","${ip}"]]]`)) t.pass('processed')
       else t.fail('no reaction')
     })
 

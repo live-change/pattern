@@ -83,21 +83,21 @@ test("compile simple chain", (t) => {
     t.plan(2)
 
     rp.prepareModelForLive(model)
-    const processor = new rp.LiveProcessor(model)
+    const processor = new rp.LiveProcessor(model, rp.relationsStore())
     const sessionId = (Math.random()*1000).toFixed()
     const userId = (Math.random()*1000).toFixed()
 
     t.test('push first event', async (t) => {
       t.plan(1)
       await processor.processEvent({ type: 'enter-website', keys: { sessionId }, time: 0 })
-      if(processor.eventRelations.get(`["start-register",[["sessionId","${sessionId}"]]]`)) t.pass('processed')
+      if(processor.store.eventRelations.get(`["start-register",[["sessionId","${sessionId}"]]]`)) t.pass('processed')
       else t.fail('no reaction')
     })
 
     t.test('push second event', async (t) => {
       t.plan(1)
       await processor.processEvent({ type: 'start-register', keys: { sessionId, userId }, time: 100 })
-      if(processor.eventRelations.get(`["finish-register",[["userId","${userId}"]]]`)) t.pass('processed')
+      if(processor.store.eventRelations.get(`["finish-register",[["userId","${userId}"]]]`)) t.pass('processed')
       else t.fail('no reaction')
     })
 

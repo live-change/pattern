@@ -341,7 +341,7 @@ test("simple chain", (t) => {
     t.plan(2)
     t.test("summary graph with events", async (t) => {
       t.plan(1)
-      const processor = new rp.SummaryGraphProcessor(model, {
+      const processor = new rp.SummaryGraphProcessor(model, rp.relationsStore(), {
         ...rp.graphAggregation.nodeElement,
         ...rp.graphAggregation.relationSimple,
         ...rp.graphAggregation.summaryEvents,
@@ -369,10 +369,9 @@ test("simple chain", (t) => {
 
       await svg.generateGraphSvg("viral-loop-summary-events-count.svg", graph, nodeViz, linkViz)
     })
-    t.pass('ok')
     t.test("depth summary graph with events", async (t) => {
       t.plan(1)
-      const processor = new rp.SummaryGraphProcessor(model, {
+      const processor = new rp.SummaryGraphProcessor(model, rp.relationsStore(), {
         ...rp.graphAggregation.nodeElementDepth,
         ...rp.graphAggregation.relationSimple,
         ...rp.graphAggregation.summaryEvents,
@@ -406,7 +405,7 @@ test("simple chain", (t) => {
 
       t.test("summary graph of "+link+" with events", async (t) => {
         t.plan(1)
-        const processor = new rp.SummaryGraphProcessor(model, {
+        const processor = new rp.SummaryGraphProcessor(model, rp.relationsStore(), {
           ...rp.graphAggregation.nodeElement,
           ...rp.graphAggregation.relationSimple,
           ...rp.graphAggregation.summaryEvents,
@@ -424,7 +423,7 @@ test("simple chain", (t) => {
       })
       t.test("depth summary graph of "+link+" with events", async (t) => {
         t.plan(1)
-        const processor = new rp.SummaryGraphProcessor(model, {
+        const processor = new rp.SummaryGraphProcessor(model, rp.relationsStore(), {
           ...rp.graphAggregation.nodeElementDepth,
           ...rp.graphAggregation.relationSimple,
           ...rp.graphAggregation.summaryEvents,
