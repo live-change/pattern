@@ -50,6 +50,9 @@ test("compile fail2ban chain with expire", (t) => {
           }
         ],
         "id": "failed-login/ip@[ip|wait:2m]/failed-login",
+        "cancel": [
+          "failed-login/wait:2m@[ip|wait:2m]"
+        ],
         "prev": [
           "failed-login"
         ],
@@ -82,7 +85,7 @@ test("compile fail2ban chain with expire", (t) => {
 
     t.test('push first event', async (t) => {
       t.plan(1)
-      const actions = await processor.processEvent({ type: 'failed-login', keys: { ip }, time }, 0)
+      const actions = await processor.processEvent({ id:1, type: 'failed-login', keys: { ip }, time }, 0)
       console.log("EVT", processor.store.eventRelations)
       console.log("TO", processor.timeouts)
       console.log("ACTIONS", actions)
@@ -104,7 +107,7 @@ test("compile fail2ban chain with expire", (t) => {
     t.test('push second event', async (t) => {
       t.plan(1)
       time += 1000
-      const actions = await processor.processEvent({ type: 'failed-login', keys: { ip }, time }, 0)
+      const actions = await processor.processEvent({ id:2, type: 'failed-login', keys: { ip }, time }, 0)
       console.log("EVT", processor.store.eventRelations)
       console.log("TO", processor.timeouts)
       console.log("ACTIONS", actions)
@@ -115,7 +118,7 @@ test("compile fail2ban chain with expire", (t) => {
     t.test('push third event', async (t) => {
       t.plan(1)
       time += 1000
-      const actions = await processor.processEvent({ type: 'failed-login', keys: { ip }, time }, 0)
+      const actions = await processor.processEvent({ id:3, type: 'failed-login', keys: { ip }, time }, 0)
       console.log("ACTIONS", actions)
       t.deepEqual(actions, ['ban'],'actions match')
     })
