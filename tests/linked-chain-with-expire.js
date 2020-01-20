@@ -18,56 +18,61 @@ test("compile fail2ban chain with expire", (t) => {
   model = compiled
 
   t.deepEqual(model, {
-    "elements": {
-      "first-failed-attempt": {
-        "id": "first-failed-attempt",
-        "type": "failed-login",
-        "prev": [],
-        "next": [
-          "first-failed-attempt/ip@[ip|wait:2m]/second-failed-attempt",
-          "first-failed-attempt/wait:2m@[ip|wait:2m]"
-        ]
-      },
-      "second-failed-attempt": {
-        "id": "second-failed-attempt",
-        "type": "failed-login",
-        "actions": ['ban'],
-        "prev": [
-          "first-failed-attempt/ip@[ip|wait:2m]/second-failed-attempt"
-        ],
-        "next": []
-      }
-    },
-    "relations": {
-      "first-failed-attempt/ip@[ip|wait:2m]/second-failed-attempt": {
-        "eq": [
-          {
-            "prev": "ip",
-            "next": "ip"
+        "elements": {
+          "first-failed-attempt": {
+            "id": "first-failed-attempt",
+            "type": "failed-login",
+            "prev": [],
+            "next": [
+              "first-failed-attempt/ip@[ip|wait:2m]/second-failed-attempt",
+              "first-failed-attempt/wait:2m@[ip|wait:2m]"
+            ]
+          },
+          "second-failed-attempt": {
+            "id": "second-failed-attempt",
+            "type": "failed-login",
+            "actions": [
+              "ban"
+            ],
+            "prev": [
+              "first-failed-attempt/ip@[ip|wait:2m]/second-failed-attempt"
+            ],
+            "next": []
           }
-        ],
-        "id": "first-failed-attempt/ip@[ip|wait:2m]/second-failed-attempt",
-        "prev": [
-          "first-failed-attempt"
-        ],
-        "next": [
-          "second-failed-attempt"
-        ]
-      },
-      "first-failed-attempt/wait:2m@[ip|wait:2m]": {
-        "id": "first-failed-attempt/wait:2m@[ip|wait:2m]",
-        "wait": "2m",
-        "cancel": [
-          "first-failed-attempt/ip@[ip|wait:2m]/second-failed-attempt",
-          "first-failed-attempt/wait:2m@[ip|wait:2m]"
-        ],
-        "prev": [
-          "first-failed-attempt"
-        ],
-        "next": []
-      }
-    }
-  })
+        },
+        "relations": {
+          "first-failed-attempt/ip@[ip|wait:2m]/second-failed-attempt": {
+            "eq": [
+              {
+                "prev": "ip",
+                "next": "ip"
+              }
+            ],
+            "id": "first-failed-attempt/ip@[ip|wait:2m]/second-failed-attempt",
+            "cancel": [
+              "first-failed-attempt/wait:2m@[ip|wait:2m]"
+            ],
+            "prev": [
+              "first-failed-attempt"
+            ],
+            "next": [
+              "second-failed-attempt"
+            ]
+          },
+          "first-failed-attempt/wait:2m@[ip|wait:2m]": {
+            "id": "first-failed-attempt/wait:2m@[ip|wait:2m]",
+            "wait": "2m",
+            "cancel": [
+              "first-failed-attempt/ip@[ip|wait:2m]/second-failed-attempt",
+              "first-failed-attempt/wait:2m@[ip|wait:2m]"
+            ],
+            "prev": [
+              "first-failed-attempt"
+            ],
+            "next": []
+          }
+        }
+      }, "compiled ok")
 
   t.test('live processor', (t) => {
     t.plan(4)
