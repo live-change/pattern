@@ -4,7 +4,7 @@ const svg = require('./svg.js')
 
 let model
 
-test("simple chain", (t) => {
+test("viral loop", (t) => {
   t.plan(4)
 
   t.test('compile', (t) => {

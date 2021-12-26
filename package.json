@@ -10,11 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/live-change/pattern.git"
   },
-  "author": {
-    "email": "m8@em8.pl",
-    "name": "Michał Łaszczewski",
-    "url": "https://www.viamage.com/"
-  },
+  "author": "Michał Łaszczewski <m8@em8.pl> (https://www.viamage.com/)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/live-change/pattern/issues"
@@ -26,5 +22,10 @@
     "d3-path-arrows": "^0.4.0",
     "d3-sankey-circular": "^0.34.0",
     "tape": "^4.13.0"
-  }
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "keywords": []
 }

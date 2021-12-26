@@ -1,5 +1,5 @@
 const test = require('tape')
-const rp = require('../index.js')
+const lcp = require('../index.js')
 
 let model
 
@@ -7,7 +7,7 @@ test("compile fail2ban chain with expire", (t) => {
 
   t.plan(2)
 
-  let { model: compiled, last } = rp.chain([
+  let { model: compiled, last } = lcp.chain([
     "failed-login",
     { eq: "ip", expire: "2m" },
     "failed-login"
@@ -78,8 +78,8 @@ test("compile fail2ban chain with expire", (t) => {
   t.test('live processor', (t) => {
     t.plan(4)
 
-    rp.prepareModelForLive(model)
-    const processor = new rp.LiveProcessor(model, rp.relationsStore())
+    lcp.prepareModelForLive(model)
+    const processor = new lcp.LiveProcessor(model, lcp.relationsStore())
     const ip = (Math.random()*1000).toFixed()
     let time = 0
 
@@ -89,6 +89,8 @@ test("compile fail2ban chain with expire", (t) => {
       console.log("EVT", processor.store.eventRelations)
       console.log("TO", processor.timeouts)
       console.log("ACTIONS", actions)
+      const relations = await processor.store.getRelations('failed-login', { ip })
+      console.log("RELATIONS", JSON.stringify(relations, null, "  "))
       if(processor.store.eventRelations.get(`["failed-login",[["ip","${ip}"]]]`)) t.pass('processed')
       else t.fail('no reaction')
     })
