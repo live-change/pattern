@@ -5,5 +5,6 @@ module.exports = {
   ...require('./lib/graph.js'),
   ...require('./lib/combinations.js'),
   ...require('./lib/duration.js'),
-  ...require('./lib/relations-store.js')
+  ...require('./lib/relations-store.js'),
+  ...require('./lib/match.js'),
 }
